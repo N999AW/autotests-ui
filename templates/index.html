@@ -5,14 +5,24 @@
     <title>Title</title>
     <style>
         .h2-text {
-        color: red
+        color: red;font-size:16px;background-color:green
         }
+        .h6-text{font-size:16px;line-height:26px;color:#000000}
+        #h1-text {font-size: 50px}
+        div.Python > a {color: brown}
+        input[type = "email"]{background-color: blue}
+        input[type = "email"]:hover {background-color: grey}
+
+        a:hover{color:red}
+        li::marker{color:red}
+        div.Python > h2 {font-size:50px}
+        ul > li:nth-child(2){color: blue}
     </style>
 </head>
 <body>
-<div><h1 id="h1-text">H1 Test</h1>
-    <h2 class="h2-text">H2 text</h2>
-    <h6 class="h2-text">H6 text</h6>
+<div class="Python"><h1 id="h1-text">H1 Test</h1>
+    <h2 class="h2-text">H2 test</h2>
+    <h6 class="h2-text h6-text">H6 text</h6>
     <p>Test text for <span style="color: green">autotests</span> on Python and Playwright.</p>
     <a href="https://github.com/N999AW/autotests-ui" target="_blank">Python</a>
     <img alt="browsers.png" src="https://avatars.githubusercontent.com/u/142293415?v=4&size=64" style="width: 250px">
@@ -34,7 +44,7 @@
         <input type='password' placeholder="Your password">
         <textarea>Ввод данных</textarea>
         <button type='submit' disabled>Text</button>
-        <button type ="submit" class ="h2-text">Отправить</button>
+        <button type="submit" class="h2-text">Отправить</button>
     </form>
     <table>
         <thead>
@@ -58,6 +68,15 @@
         </tbody>
     </table>
 </div>
-
+<div class="JavaScript">
+    <a href="https://github.com/N999AW/autotests-ui" target="_blank">JavaScrict</a>
+    <h2 class="h2-text">H2 text</h2>
+    <ul>
+        <li>Item 1</li>
+        <li>Item 2</li>
+        <li>Item 3</li>
+        <li><a href="https://github.com/N999AW/autotests-ui" target="_blank">Python</a></li>
+    </ul>
+</div>
 </body>
 </html>
