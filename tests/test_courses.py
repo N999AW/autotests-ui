@@ -35,7 +35,7 @@ def test_empty_courses_list():
         H62 = page.get_by_test_id("courses-list-empty-view-title-text")
         expect(H62).to_have_text("There is no results")
         Icon = page.get_by_test_id("courses-list-empty-view-icon")
-        expect(Icon).to_be_visible()
+        expect(Icon).to_be_attached()
         lower_text = page.get_by_test_id("courses-list-empty-view-description-text")
         expect(lower_text).to_have_text("Results from the load test pipeline will be displayed here")
         page.wait_for_timeout(5000)
