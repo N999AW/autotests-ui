@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <title>Chrome Dev Tools</title>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+
+    <link rel="stylesheet" type="text/css" href="https://cdnjs.cloudflare.com/ajax/libs/normalize/8.0.1/normalize.min.css" />
+
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+
+        body {
+            margin: 30px;
+        }
+
+        #memory {
+            position: relative;
+            top: 0;
+            transition: all 1s ease;
+        }
+
+        #memory:hover {
+            /* top: 30px; */
+            /* transform: translateY(30px); */
+            color: green;
+        }
+    </style>
+</head>
+
+<body>
+    <button id="memory">Утечка памяти</button>
+    <button id="memory_stop">Остановить утечку</button>
+    <button id="memory_remove">Очистить</button>
+
+    <input type="text" id="input" />
+
+    <button id="debug">Debugger</button>
+    <button id="fetchButton">Fetch</button>
+
+    <script>
+        // JavaScript код из index.js
+        (function() {
+            console.log('Скрипт загружен');
+
+            let intervalId = null;
+            let items = [];
+
+            // Утечка памяти
+            document.getElementById('memory').addEventListener('click', function() {
+                if (intervalId) return;
+
+                intervalId = setInterval(function() {
+                    for (let i = 0; i < 1000; i++) {
+                        items.push(new Array(1000).fill('утечка памяти'));
+                    }
+                    console.log('Добавлено элементов:', items.length);
+                }, 100);
+            });
+
+            // Остановить утечку
+            document.getElementById('memory_stop').addEventListener('click', function() {
+                if (intervalId) {
+                    clearInterval(intervalId);
+                    intervalId = null;
+                    console.log('Утечка остановлена');
+                }
+            });
+
+            // Очистить
+            document.getElementById('memory_remove').addEventListener('click', function() {
+                items = [];
+                console.log('Массив очищен');
+            });
+
+            // Debugger
+            document.getElementById('debug').addEventListener('click', function() {
+                debugger;
+                console.log('Дебаггер сработал');
+            });
+
+            // Fetch запрос
+            document.getElementById('fetchButton').addEventListener('click', function() {
+                fetch('https://jsonplaceholder.typicode.com/todos/1')
+                    .then(response => response.json())
+                    .then(data => console.log('Fetch response:', data))
+                    .catch(error => console.error('Fetch error:', error));
+            });
+
+            // Обработчик ввода
+            document.getElementById('input').addEventListener('input', function(e) {
+                console.log('Введено:', e.target.value);
+            });
+        })();
+    </script>
+</body>
+</html>
