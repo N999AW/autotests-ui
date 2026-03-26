@@ -20,10 +20,22 @@ def test_open_browser(browser: str):
 
 @pytest.mark.parametrize('user', ['Alice', 'Zara'])
 class TestOperations:
-
-    def test_user_with_operations(self, user: str):
-        print("")
+    @pytest.mark.parametrize("account", ["Credit", "Debit card"])
+    def test_user_with_operations(self, user: str, account: str):
+        print(f"User with operations: {user}, account: {account}")
 
     def test_user_without_operations(self, user: str):
-         ...
-        
+         print(f"User without operations: {user}")
+
+users = {
+    "+70000000011": "User with money on bank account",
+    "+70000000022": "User without money on bank account",
+    "+70000000033": "User with operations on bank account"
+}
+@pytest.mark.parametrize(
+    'phone_number',
+    users.keys(),
+    ids=lambda phone_number: f'{phone_number}: {users[phone_number]}'
+)
+def test_identifiers(phone_number: str):
+    ...
