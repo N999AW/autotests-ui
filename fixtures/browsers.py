@@ -1,12 +1,18 @@
 import pytest
+from _pytest.fixtures import SubRequest
 from playwright.sync_api import Playwright, Page
 
+from config import settings
+from fixtures.pages import initialize_playwright_page
 
-@pytest.fixture
-def chromium_page(playwright: Playwright) -> Page:
-    browser = playwright.chromium.launch(headless=False)
-    yield browser.new_page()
-    browser.close()
+
+@pytest.fixture(params=settings.browsers)
+def chromium_page(request: SubRequest, playwright: Playwright) -> Page:
+    yield from initialize_playwright_page(
+        playwright,
+        test_name=request.node.name,
+        browser_type=request.param  # Передаем браузер как параметр
+    )
 
 
 @pytest.fixture(scope="session")
@@ -33,9 +39,11 @@ def initialize_browser_state(playwright: Playwright):
     browser.close()
 
 
-@pytest.fixture
-def chromium_page_with_state(initialize_browser_state, playwright: Playwright) -> Page:
-    browser = playwright.chromium.launch(headless=False)
-    context = browser.new_context(storage_state="browser-state.json")
-    yield context.new_page()
-    browser.close()
+@pytest.fixture(params=settings.browsers)
+def chromium_page_with_state(initialize_browser_state, request: SubRequest, playwright: Playwright) -> Page:
+    yield from initialize_playwright_page(
+        playwright,
+        test_name=request.node.name,
+        browser_type=request.param,  # Передаем браузер как параметр
+        storage_state=settings.browser_state_file,
+    )
