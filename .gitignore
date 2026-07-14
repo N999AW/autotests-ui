@@ -1,0 +1,20 @@
+# pycharm
+.idea
+
+# python
+.venv
+__pycache__
+
+# allure
+allure-results
+allure-report
+
+# testing artifacts
+*.html
+*.json
+videos
+tracing
+
+# others files
+test_stage
+test_stage_in_process
