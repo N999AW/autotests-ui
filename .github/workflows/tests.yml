@@ -23,7 +23,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m install --upgrade pip
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
           playwright install --with-deps
 
@@ -31,24 +31,34 @@ jobs:
         run: |
           pytest -m regression --alluredir=./allure-results --numprocesses 2
 
-      - name: Get Allure history
-        uses: actions/checkout@v3
+      - name: Upload Allure results as artifact
         if: always()
-        continue-on-error: true
+        uses: actions/upload-artifact@v4
         with:
-          ref: gh-pages
-          path: gf-pages
+          name: allure-results
+          path: ./allure-results
 
-      - name: Allure Report action from marketplace
-        uses: simple-elf/allure-report-action@v1.7
+      - name: Install Allure (без Docker)
         if: always()
-        with:
-          allure_results: allure-results
-          allure_history: allure-history
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y default-jre
+          wget -q -O allure.tgz https://github.com/allure-framework/allure2/releases/download/2.32.2/allure-2.32.2.tgz
+          tar -xzf allure.tgz
+          sudo mv allure-2.32.2 /opt/allure
+          sudo ln -s /opt/allure/bin/allure /usr/local/bin/allure
+
+      - name: Generate Allure report
+        if: always()
+        run: |
+          allure generate ./allure-results -o ./allure-report --clean
 
       - name: Deploy report to Github Pages
+        if: always()
         uses: peaceiris/actions-gh-pages@v4.0.0
         env:
           PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PUBLISH_BRANCH: gh_pages
-          PUBLISH_DIR: allure-history
+          PUBLISH_BRANCH: gh-pages
+          PUBLISH_DIR: ./allure-report
+        with:
+          enable_jekyll: false
