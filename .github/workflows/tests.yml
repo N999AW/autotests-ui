@@ -51,7 +51,7 @@ jobs:
           path: gh-pages
 
       - name: Deploy report to Github Pages
-        uses: peaceiris/actions-gh-pages@v4.0.0
+        uses: peaceiris/actions-gh-pages@v4.1.0
         if: always()
         env:
           PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
