@@ -23,7 +23,7 @@ jobs:
 
       - name: Install dependencies
         run: |
-          python -m install --upgrade pip
+          python -m pip install --upgrade pip
           pip install -r requirements.txt
           playwright install --with-deps
 
@@ -31,24 +31,31 @@ jobs:
         run: |
           pytest -m regression --alluredir=./allure-results --numprocesses 2
 
+      # ===== НОВЫЙ ШАГ ВМЕСТО simple-elf/allure-report-action =====
+      - name: Generate Allure report using Docker
+        if: always()
+        run: |
+          docker run --rm \
+            -v $(pwd)/allure-results:/app/allure-results \
+            -v $(pwd)/allure-report:/app/allure-report \
+            frankescobar/allure-docker-service:latest \
+            allure generate /app/allure-results -o /app/allure-report --clean
+      # =============================================================
+
       - name: Get Allure history
         uses: actions/checkout@v3
         if: always()
         continue-on-error: true
         with:
           ref: gh-pages
-          path: gf-pages
-
-      - name: Allure Report action from marketplace
-        uses: simple-elf/allure-report-action@v1.7
-        if: always()
-        with:
-          allure_results: allure-results
-          allure_history: allure-history
+          path: gh-pages
 
       - name: Deploy report to Github Pages
         uses: peaceiris/actions-gh-pages@v4.0.0
+        if: always()
         env:
           PERSONAL_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-          PUBLISH_BRANCH: gh_pages
-          PUBLISH_DIR: allure-history
+          PUBLISH_BRANCH: gh-pages
+          PUBLISH_DIR: allure-report
+        with:
+          enable_jekyll: false
