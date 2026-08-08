@@ -9,7 +9,6 @@ on:
     branches:
       - main
 
-# Разрешаем GitHub Actions записывать результат в репозиторий
 permissions:
   contents: write
 
@@ -18,23 +17,24 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
+
       # =========================
-      # 1. Получаем код
+      # Checkout
       # =========================
       - name: Check out repository
         uses: actions/checkout@v6
 
       # =========================
-      # 2. Устанавливаем Python
+      # Python
       # =========================
       - name: Set up Python
-        uses: actions/setup-python@v5
+        uses: actions/setup-python@v7
         with:
           python-version: "3.11"
           cache: "pip"
 
       # =========================
-      # 3. Устанавливаем зависимости
+      # Dependencies
       # =========================
       - name: Install dependencies
         run: |
@@ -43,7 +43,7 @@ jobs:
           playwright install --with-deps
 
       # =========================
-      # 4. Запускаем тесты
+      # Tests
       # =========================
       - name: Run Playwright tests
         run: |
@@ -52,29 +52,7 @@ jobs:
             --numprocesses 2
 
       # =========================
-      # 5. Получаем предыдущую историю Allure
-      # =========================
-      - name: Get Allure history
-        if: always()
-        uses: actions/checkout@v6
-        continue-on-error: true
-        with:
-          ref: gh-pages
-          path: gh-pages
-
-      # =========================
-      # 6. Копируем историю в результаты
-      # =========================
-      - name: Restore Allure history
-        if: always()
-        run: |
-          if [ -d "gh-pages/history" ]; then
-            mkdir -p allure-results/history
-            cp -R gh-pages/history/. allure-results/history/
-          fi
-
-      # =========================
-      # 7. Генерируем Allure report
+      # Generate Allure report
       # =========================
       - name: Generate Allure report
         if: always()
@@ -88,10 +66,10 @@ jobs:
             --clean
 
       # =========================
-      # 8. Публикуем Allure report
+      # Deploy to GitHub Pages
       # =========================
       - name: Deploy report to GitHub Pages
-        if: always()
+        if: always() && github.event_name == 'push' && github.ref == 'refs/heads/main'
         uses: peaceiris/actions-gh-pages@v4
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
