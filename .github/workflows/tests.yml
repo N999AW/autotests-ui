@@ -4,58 +4,97 @@ on:
   push:
     branches:
       - main
+
   pull_request:
     branches:
       - main
+
+# Разрешаем GitHub Actions записывать результат в репозиторий
+permissions:
+  contents: write
 
 jobs:
   run-tests:
     runs-on: ubuntu-latest
 
     steps:
+      # =========================
+      # 1. Получаем код
+      # =========================
       - name: Check out repository
-        uses: actions/checkout@v3
+        uses: actions/checkout@v6
 
+      # =========================
+      # 2. Устанавливаем Python
+      # =========================
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: "3.11"
+          cache: "pip"
 
+      # =========================
+      # 3. Устанавливаем зависимости
+      # =========================
       - name: Install dependencies
         run: |
           python -m pip install --upgrade pip
           pip install -r requirements.txt
           playwright install --with-deps
 
-      - name: Run Playwright tests with pytest and generate Allure results
+      # =========================
+      # 4. Запускаем тесты
+      # =========================
+      - name: Run Playwright tests
         run: |
-          pytest -m regression --alluredir=./allure-results --numprocesses 2
+          pytest -m regression \
+            --alluredir=./allure-results \
+            --numprocesses 2
 
-      # ===== НОВЫЙ ШАГ ВМЕСТО simple-elf/allure-report-action =====
-      - name: Generate Allure report using Docker
-        if: always()
-        run: |
-          docker run --rm \
-            -v $(pwd)/allure-results:/app/allure-results \
-            -v $(pwd)/allure-report:/app/allure-report \
-            frankescobar/allure-docker-service:latest \
-            allure generate /app/allure-results -o /app/allure-report --clean
-      # =============================================================
-
+      # =========================
+      # 5. Получаем предыдущую историю Allure
+      # =========================
       - name: Get Allure history
-        uses: actions/checkout@v3
         if: always()
+        uses: actions/checkout@v6
         continue-on-error: true
         with:
           ref: gh-pages
           path: gh-pages
 
-      - name: Deploy report to Github Pages
-        uses: peaceiris/actions-gh-pages@v4.1.0
+      # =========================
+      # 6. Копируем историю в результаты
+      # =========================
+      - name: Restore Allure history
         if: always()
-        env:
-          github_token: ${{ secrets.GITHUB_TOKEN }}
-          PUBLISH_BRANCH: gh-pages
-          PUBLISH_DIR: allure-report
+        run: |
+          if [ -d "gh-pages/history" ]; then
+            mkdir -p allure-results/history
+            cp -R gh-pages/history/. allure-results/history/
+          fi
+
+      # =========================
+      # 7. Генерируем Allure report
+      # =========================
+      - name: Generate Allure report
+        if: always()
+        run: |
+          docker run --rm \
+            -v "$(pwd)/allure-results:/app/allure-results" \
+            -v "$(pwd)/allure-report:/app/allure-report" \
+            frankescobar/allure-docker-service:latest \
+            allure generate /app/allure-results \
+            -o /app/allure-report \
+            --clean
+
+      # =========================
+      # 8. Публикуем Allure report
+      # =========================
+      - name: Deploy report to GitHub Pages
+        if: always()
+        uses: peaceiris/actions-gh-pages@v4
         with:
+          github_token: ${{ secrets.GITHUB_TOKEN }}
+          publish_branch: gh-pages
+          publish_dir: ./allure-report
           enable_jekyll: false
